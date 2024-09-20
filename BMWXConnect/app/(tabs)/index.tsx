@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TextInput, Button, Text, FlatList, TouchableOpacity, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { blue } from 'react-native-reanimated/lib/typescript/reanimated2/Colors';
 
 const App = () => {
   const [colleagues, setColleagues] = useState([]);
@@ -91,10 +90,11 @@ const App = () => {
   return (
     <View style={styles.container}>
       {/* Logo in the upper right corner */}
-      <Image
-        source={require('/workspace/networking/BMWXConnect/assets/images/BMW.png')}
+     <Image
+        source={require('../../assets/images/bmwpng.png')}
         style={styles.logo}
       />
+      
       <Text style={styles.title}>My BMW XConnect</Text>
       <View style={styles.inputContainer}>
         <TextInput
