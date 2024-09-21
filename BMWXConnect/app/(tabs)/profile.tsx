@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, StyleSheet, Text, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import QRCode from 'react-native-qrcode-svg';  // Correct import for React Native QR code
 
 const ProfilePage = () => {
   const [name, setName] = useState('');
   const [surname, setSurname] = useState('');
   const [department, setDepartment] = useState('');
   const [description, setDescription] = useState('');
+  const [showQRCode, setShowQRCode] = useState(false);
 
-  // Load profile data from AsyncStorage when the component mounts
   useEffect(() => {
     loadProfileData();
   }, []);
@@ -28,7 +29,6 @@ const ProfilePage = () => {
     }
   };
 
-  // Save profile data to AsyncStorage
   const saveProfileData = async () => {
     try {
       await AsyncStorage.setItem('name', name);
@@ -39,6 +39,10 @@ const ProfilePage = () => {
     } catch (error) {
       Alert.alert('Error', 'Failed to save profile data.');
     }
+  };
+
+  const toggleQRCode = () => {
+    setShowQRCode(!showQRCode);
   };
 
   return (
@@ -74,11 +78,29 @@ const ProfilePage = () => {
         onChangeText={setDescription}
         placeholder="Enter a short description"
       />
+      <View>
+      <View style={styles.buttonContainer}>
+        <Button color='#1c69d4' title="Save Profile" onPress={saveProfileData} />
+      </View>
 
-      <Button color='#1c69d4' title="Save Profile" onPress={saveProfileData} />
+      <View style={styles.buttonContainer}>
+        <Button color='#1c69d4' title="Share via QR Code" onPress={toggleQRCode} />
+      </View>
     </View>
+
+
+      {showQRCode && (
+        <QRCode
+          value={JSON.stringify({ name, surname, department, description })}
+          size={200}
+        />
+      )}
+    </View>
+    
   );
 };
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -86,6 +108,9 @@ const styles = StyleSheet.create({
     padding: 20,
     justifyContent: 'center',
   },
+    buttonContainer: {
+      marginVertical: 10, // Adjust the space between buttons here
+    },
   label: {
     fontSize: 16,
     marginBottom: 10,

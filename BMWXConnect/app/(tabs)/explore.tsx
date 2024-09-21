@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+/* import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, Image, Platform } from 'react-native';
 
 import { Collapsible } from '@/components/Collapsible';
@@ -100,3 +100,4 @@ const styles = StyleSheet.create({
     gap: 8,
   },
 });
+ */
