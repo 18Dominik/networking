@@ -13,7 +13,10 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-      }}>
+      }}
+    >
+
+
       <Tabs.Screen
         name="index"
         options={{
@@ -23,6 +26,17 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'person' : 'person-outline'} color={color} />
+          ),
+        }}
+      />
+
       <Tabs.Screen
         name="explore"
         options={{
@@ -32,6 +46,7 @@ export default function TabLayout() {
           ),
         }}
       />
+
     </Tabs>
   );
 }
