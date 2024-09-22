@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, Alert } from 'react-native';
+import { View, useColorScheme, TextInput, Button, StyleSheet, Text, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import QRCode from 'react-native-qrcode-svg';  // Correct import for React Native QR code
 
@@ -9,6 +9,11 @@ const ProfilePage = () => {
   const [department, setDepartment] = useState('');
   const [description, setDescription] = useState('');
   const [showQRCode, setShowQRCode] = useState(false);
+
+  // Detect whether dark mode or light mode is active
+  const colorScheme = useColorScheme();
+  //const isDarkMode = colorScheme === 'dark';
+  const isDarkMode = 'dark';
 
   useEffect(() => {
     loadProfileData();
@@ -46,39 +51,43 @@ const ProfilePage = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Name:</Text>
+    <View style={[styles.container, isDarkMode ? styles.darkContainer : styles.lightContainer]}>
+      <Text style={[styles.label, isDarkMode ? styles.darkText : styles.lightText]}>Name:</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, isDarkMode ? styles.darkInput : styles.lightInput]}
         value={name}
         onChangeText={setName}
         placeholder="Enter your name"
+        placeholderTextColor={isDarkMode ? '#888888' : '#888'}
       />
 
-      <Text style={styles.label}>Surname:</Text>
+      <Text style={[styles.label, isDarkMode ? styles.darkText : styles.lightText]}>Surname:</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, isDarkMode ? styles.darkInput : styles.lightInput]}
         value={surname}
         onChangeText={setSurname}
         placeholder="Enter your surname"
+        placeholderTextColor={isDarkMode ? '#888888' : '#888'}
       />
 
-      <Text style={styles.label}>Department:</Text>
+      <Text style={[styles.label, isDarkMode ? styles.darkText : styles.lightText]}>Department:</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, isDarkMode ? styles.darkInput : styles.lightInput]}
         value={department}
         onChangeText={setDepartment}
         placeholder="Enter your department"
+        placeholderTextColor={isDarkMode ? '#888888' : '#888'}
       />
 
-      <Text style={styles.label}>Description:</Text>
+      <Text style={[styles.label, isDarkMode ? styles.darkText : styles.lightText]}>Description:</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, isDarkMode ? styles.darkInput : styles.lightInput]}
         value={description}
         onChangeText={setDescription}
         placeholder="Enter a short description"
+        placeholderTextColor={isDarkMode ? '#888888' : '#888'}
       />
-      <View>
+
       <View style={styles.buttonContainer}>
         <Button color='#1c69d4' title="Save Profile" onPress={saveProfileData} />
       </View>
@@ -86,8 +95,6 @@ const ProfilePage = () => {
       <View style={styles.buttonContainer}>
         <Button color='#1c69d4' title="Share via QR Code" onPress={toggleQRCode} />
       </View>
-    </View>
-
 
       {showQRCode && (
         <QRCode
@@ -96,32 +103,51 @@ const ProfilePage = () => {
         />
       )}
     </View>
-    
   );
 };
 
-
-
+// Styles for Dark and Light Mode
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
     justifyContent: 'center',
   },
-    buttonContainer: {
-      marginVertical: 10, // Adjust the space between buttons here
-    },
+  lightContainer: {
+    backgroundColor: '#ffffff',
+  },
+  darkContainer: {
+    backgroundColor: '#000000',
+  },
+  buttonContainer: {
+    marginVertical: 10,
+  },
   label: {
     fontSize: 16,
     marginBottom: 10,
   },
+  lightText: {
+    color: '#000',
+  },
+  darkText: {
+    color: '#fff',
+  },
   input: {
     height: 40,
-    borderColor: 'gray',
     borderWidth: 1,
     marginBottom: 20,
     paddingLeft: 10,
     borderRadius: 5,
+  },
+  lightInput: {
+    borderColor: 'gray',
+    backgroundColor: '#fff',
+    color: '#000',
+  },
+  darkInput: {
+    borderColor: '#555',
+    backgroundColor: '#333',
+    color: '#fff',
   },
 });
 

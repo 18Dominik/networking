@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TextInput, Button, Text, FlatList, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, View, TextInput, Button, Text, FlatList, TouchableOpacity, Image, useColorScheme } from 'react-native';
+
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const App = () => {
+
+  // Detect whether dark mode or light mode is active
+  const colorScheme = useColorScheme();
+  
+
+  // Conditional styles based on the color scheme
+  const isDarkMode = colorScheme === 'dark';
+
   const [colleagues, setColleagues] = useState([]);
   const [filteredColleagues, setFilteredColleagues] = useState([]);
   const [name, setName] = useState('');
@@ -88,60 +98,69 @@ const App = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isDarkMode ? styles.darkContainer : styles.lightContainer]}>      
       {/* Logo in the upper right corner */}
-     <Image
+      <Image
         source={require('../../assets/images/bmwpng.png')}
         style={styles.logo}
       />
+
+      <Text style={[styles.title, isDarkMode ? styles.darkText : styles.lightText]}>My BMW XConnect</Text>
       
-      <Text style={styles.title}>My BMW XConnect</Text>
       <View style={styles.inputContainer}>
         <TextInput
-          style={styles.input}
+          style={[styles.input, isDarkMode ? styles.darkInput : styles.lightInput]}
           placeholder="Name"
+          placeholderTextColor={isDarkMode ? '#888888' : '#888'}
           value={name}
           onChangeText={setName}
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, isDarkMode ? styles.darkInput : styles.lightInput]}
           placeholder="Surname"
+          placeholderTextColor={isDarkMode ? '#888888' : '#888'}
           value={surname}
           onChangeText={setSurname}
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, isDarkMode ? styles.darkInput : styles.lightInput]}
           placeholder="Department"
+          placeholderTextColor={isDarkMode ? '#888888' : '#888'}
           value={department}
           onChangeText={setDepartment}
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, isDarkMode ? styles.darkInput : styles.lightInput]}
           placeholder="Description"
+          placeholderTextColor={isDarkMode ? '#888888' : '#888'}
           value={description}
           onChangeText={setDescription}
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, isDarkMode ? styles.darkInput : styles.lightInput]}
           placeholder="Last Catch-Up Protocol"
+          placeholderTextColor={isDarkMode ? '#888888' : '#888'}
           value={protocol}
           onChangeText={setProtocol}
         />
         <Button color='#1c69d4' title={editingId ? "Update" : "Add"} onPress={saveColleague} />
       </View>
+      
       <TextInput
-        style={styles.searchInput}
+        style={[styles.searchInput, isDarkMode ? styles.darkInput : styles.lightInput]}
         placeholder="Search by name, surname, department, description or protocol"
+        placeholderTextColor={isDarkMode ? '#888888' : '#888'}
         value={search}
         onChangeText={searchColleagues}
       />
+
       <FlatList
         data={filteredColleagues}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <View style={styles.colleagueItem}>
             <View style={styles.colleagueDetails}>
-              <Text style={styles.colleagueText}>{item.name} {item.surname}</Text>
+              <Text style={[styles.colleagueText, isDarkMode ? styles.darkText : styles.lightText]}>{item.name} {item.surname}</Text>
               <Text>
                 <Text style={styles.attribute}>Department: </Text>
                 <Text style={styles.colleagueText}>{item.department}</Text>
@@ -179,8 +198,14 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingHorizontal: 20,
   },
+  lightContainer: {
+    backgroundColor: '#ffffff',
+  },
+  darkContainer: {
+    backgroundColor: '#000000',
+  },
   attribute: {
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   logo: {
     width: 50,
@@ -194,6 +219,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
   },
+  lightText: {
+    color: '#000',
+  },
+  darkText: {
+    color: '#fff',
+  },
   inputContainer: {
     marginBottom: 20,
   },
@@ -202,6 +233,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 10,
     paddingHorizontal: 10,
+  },
+  lightInput: {
+    backgroundColor: '#fff',
+    color: '#000',
+  },
+  darkInput: {
+    backgroundColor: '#333',
+    color: '#fff',
   },
   searchInput: {
     borderColor: 'gray',
@@ -230,6 +269,8 @@ const styles = StyleSheet.create({
     color: 'blue',
     marginRight: 10,
   },
+
+
   deleteButton: {
     color: 'red',
   },
