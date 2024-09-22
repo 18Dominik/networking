@@ -1,25 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, Button, Alert, StyleSheet } from 'react-native';
-import { Camera } from 'expo-camera';
+import { Text, View, Button, Alert, StyleSheet, TouchableOpacity } from 'react-native';
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera'; // Updated to use CameraView and useCameraPermissions
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ScannerPage = ({ navigation }) => {
-  const [hasPermission, setHasPermission] = useState(null);
+  const [facing, setFacing] = useState<CameraType>('back');
   const [scanned, setScanned] = useState(false);
-												   
+  const [permission, requestPermission] = useCameraPermissions(); // Using useCameraPermissions hook
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
-
+  // Function to handle scanned data
   const handleBarCodeScanned = async ({ type, data }) => {
     setScanned(true);
 
     try {
-      // Basic JSON validation check
       const isValidJson = (str) => {
         try {
           JSON.parse(str);
@@ -46,24 +39,39 @@ const ScannerPage = ({ navigation }) => {
     }
   };
 
-  if (hasPermission === null) {
-    return <Text>Requesting camera permission...</Text>;
+  if (!permission) {
+    // Camera permissions are still loading.
+    return <View />;
   }
-  if (hasPermission === false) {
-    return <Text>No access to camera</Text>;
+
+  if (!permission.granted) {
+    // Camera permissions are not granted yet.
+    return (
+      <View style={styles.container}>
+        <Text style={styles.message}>We need your permission to show the camera</Text>
+        <Button onPress={requestPermission} title="grant permission" />
+      </View>
+    );
+  }
+
+  function toggleCameraFacing() {
+    setFacing((current) => (current === 'back' ? 'front' : 'back'));
   }
 
   return (
     <View style={styles.container}>
-													
-      <Camera
-        style={StyleSheet.absoluteFillObject}
-        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-        barCodeScannerSettings={{
-          barCodeTypes: ['qr'], // Only scan QR codes
-        }}
-						  
-      />
+      <CameraView
+        style={styles.camera}
+        facing={facing}
+        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned} // QR code scanner function
+      >
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+            <Text style={styles.text}>Flip Camera</Text>
+          </TouchableOpacity>
+        </View>
+      </CameraView>
+
       {scanned && <Button title="Tap to Scan Again" onPress={() => setScanned(false)} />}
     </View>
   );
@@ -72,9 +80,29 @@ const ScannerPage = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-						 
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  camera: {
+    flex: 1,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    backgroundColor: 'transparent',
+    margin: 64,
+  },
+  button: {
+    alignSelf: 'flex-end',
+    alignItems: 'center',
+  },
+  text: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  message: {
+    textAlign: 'center',
+    paddingBottom: 10,
   },
 });
 
