@@ -2,11 +2,17 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "jsx": "react-native", // Ensure React Native JSX is supported
+    "esModuleInterop": true, // Allow better compatibility with CommonJS modules like expo-camera
     "paths": {
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "lib": [
+      "esnext",
+      "dom" // Include DOM types for proper JSX support
+    ]
   },
   "include": [
     "**/*.ts",
