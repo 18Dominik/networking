@@ -12,8 +12,7 @@ const ProfilePage = () => {
 
   // Detect whether dark mode or light mode is active
   const colorScheme = useColorScheme();
-  //const isDarkMode = colorScheme === 'dark';
-  const isDarkMode = 'dark';
+  const isDarkMode = colorScheme === 'dark';
 
   useEffect(() => {
     loadProfileData();
