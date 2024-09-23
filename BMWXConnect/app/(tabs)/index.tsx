@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TextInput, Button, Text, FlatList, TouchableOpacity, Image, useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MaterialIcons } from '@expo/vector-icons'; // Example for using vector icons
+
 
 const App = () => {
 
@@ -153,9 +155,11 @@ const App = () => {
         source={require('../../assets/images/bmwpng.png')}
         style={styles.logo}
       />
-        <Button color='#1c69d4' title={"Refresh"} onPress={reloadTab} />
 
       <Text style={[styles.title, isDarkMode ? styles.darkText : styles.lightText]}>My BMW XConnect</Text>
+
+      <Button color='#1c69d4' title={"Refresh"} onPress={reloadTab} />
+
       
       <View style={styles.inputContainer}>
         <TextInput
