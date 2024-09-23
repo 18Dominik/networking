@@ -31,9 +31,9 @@ const App = () => {
     fetchColleagues();
 
     retrieveScannedData();  // Fetch the JSON from the QR code
-    console.log(AsyncStorage.getItem('scannedBarcode'));
+    //console.log(AsyncStorage.getItem('scannedBarcode'));
 
-  }, [refresh]);
+  }, [refresh]);// Add refresh as a dependency
 
     // Function to trigger refresh
     const reloadTab = () => {
