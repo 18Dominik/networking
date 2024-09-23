@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Text, View, Button, Alert, StyleSheet, TouchableOpacity } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera'; // Updated to use CameraView and useCameraPermissions
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ProfilePage from './profile';
 
 const ScannerPage = ({ navigation }) => {
   const [facing, setFacing] = useState<CameraType>('back');
@@ -9,35 +10,55 @@ const ScannerPage = ({ navigation }) => {
   const [permission, requestPermission] = useCameraPermissions(); // Using useCameraPermissions hook
 
   // Function to handle scanned data
-  const handleBarCodeScanned = async ({ type, data }) => {
+  const handleBarCodeScanned = async({ type, data }) => {
     setScanned(true);
-
+    alert(`Bar code with type ${type} and data ${data} has been scanned!`);
     try {
-      const isValidJson = (str) => {
-        try {
-          JSON.parse(str);
-          return true;
-        } catch {
-          return false;
-        }
-      };
+      // Parse the scanned data as JSON assuming it has the correct structure
+      const parsedData = JSON.parse(data);
+      const { namep, surnamep, departmentp, descriptionp } = parsedData;
 
-      if (isValidJson(data)) {
-        const profileData = JSON.parse(data); // Parse the JSON data from the QR code
-        await AsyncStorage.setItem('name', profileData.name);
-        await AsyncStorage.setItem('surname', profileData.surname);
-        await AsyncStorage.setItem('department', profileData.department);
-        await AsyncStorage.setItem('description', profileData.description);
+      // Ensure that all the expected fields are present
+      if (namep && surnamep && departmentp && descriptionp) {
+        // Create the JSON object to store
+        const barcodeData = {
+          namep,
+          surnamep,
+          departmentp,
+          descriptionp,
+        };
 
-        Alert.alert('Success', 'Profile data loaded successfully!');
-        navigation.navigate('ProfilePage');
+        // Save JSON data to AsyncStorage
+        await AsyncStorage.setItem('scannedBarcode', JSON.stringify(barcodeData));
+
+        Alert.alert('Success', 'Profile data saved successfully!');
+        console.log('Saved Barcode Data:', barcodeData);
       } else {
-        Alert.alert('Error', 'Scanned data is not valid JSON.');
+        Alert.alert('Error', 'Invalid data format in the scanned code.');
+        console.log('Invalid JSON structure', parsedData);
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to load profile data from QR code.');
+      Alert.alert('Error', 'Failed to parse scanned data.');
+      console.error('Failed to save barcode data:', error);
     }
   };
+
+   // Function to retrieve and display saved JSON data
+   const retrieveBarcodeData = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem('scannedBarcode');
+      if (jsonValue != null) {
+        const barcodeData = JSON.parse(jsonValue);
+        console.log('Retrieved Barcode Data:', barcodeData);
+      } else {
+        console.log('No data found');
+      }
+    } catch (e) {
+      console.error('Failed to retrieve data', e);
+    }
+  };
+
+
 
   if (!permission) {
     // Camera permissions are still loading.
@@ -54,26 +75,24 @@ const ScannerPage = ({ navigation }) => {
     );
   }
 
-  function toggleCameraFacing() {
-    setFacing((current) => (current === 'back' ? 'front' : 'back'));
-  }
+
 
   return (
     <View style={styles.container}>
       <CameraView
-        style={styles.camera}
-        facing={facing}
-        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned} // QR code scanner function
-      >
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-            <Text style={styles.text}>Flip Camera</Text>
-          </TouchableOpacity>
-        </View>
-      </CameraView>
+        onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+        barcodeScannerSettings={{
+          barcodeTypes: ["qr", "pdf417"],
+        }
+      }
+        style={StyleSheet.absoluteFillObject}
+      />
+      {scanned && (
+        <Button title={"Tap to Scan Again"} onPress={() => setScanned(false)} />
+      )}
 
-      {scanned && <Button title="Tap to Scan Again" onPress={() => setScanned(false)} />}
     </View>
+    
   );
 };
 
@@ -105,5 +124,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
 });
+
+
 
 export default ScannerPage;

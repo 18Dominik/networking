@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TextInput, Button, Text, FlatList, TouchableOpacity, Image, useColorScheme } from 'react-native';
-
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const App = () => {
@@ -9,7 +7,11 @@ const App = () => {
   // Detect whether dark mode or light mode is active
   const colorScheme = useColorScheme();
   
+//f for refresh
 
+  const [refresh, setRefresh] = useState(false); // State to trigger refresh
+  
+ 
   // Conditional styles based on the color scheme
   const isDarkMode = colorScheme === 'dark';
 
@@ -23,9 +25,56 @@ const App = () => {
   const [editingId, setEditingId] = useState(null);
   const [search, setSearch] = useState('');
 
+ 
   useEffect(() => {
+
     fetchColleagues();
-  }, []);
+
+    retrieveScannedData();  // Fetch the JSON from the QR code
+    console.log(AsyncStorage.getItem('scannedBarcode'));
+
+  }, [refresh]);
+
+    // Function to trigger refresh
+    const reloadTab = () => {
+      setRefresh(!refresh); 
+      retrieveScannedData(); // Toggling refresh state
+    };
+
+
+  // Function to retrieve JSON data from AsyncStorage
+
+  const retrieveScannedData = async () => {
+
+    try {
+
+      const scannedData = await AsyncStorage.getItem('scannedBarcode');
+
+      if (scannedData !== null) {
+
+        const { namep, surnamep, departmentp, descriptionp } = JSON.parse(scannedData);
+
+        setName(namep);         // Prefill the fields
+
+        setSurname(surnamep);
+
+        setDepartment(departmentp);
+
+        setDescription(descriptionp);
+
+        console.log('Prefilled with QR data');
+
+      }
+
+    } catch (error) {
+
+      console.error('Failed to retrieve scanned data:', error);
+
+    }
+
+  };
+
+
 
   const fetchColleagues = async () => {
     try {
@@ -104,6 +153,7 @@ const App = () => {
         source={require('../../assets/images/bmwpng.png')}
         style={styles.logo}
       />
+        <Button color='#1c69d4' title={"Refresh"} onPress={reloadTab} />
 
       <Text style={[styles.title, isDarkMode ? styles.darkText : styles.lightText]}>My BMW XConnect</Text>
       
@@ -162,18 +212,18 @@ const App = () => {
             <View style={styles.colleagueDetails}>
               <Text style={[styles.colleagueText, isDarkMode ? styles.darkText : styles.lightText]}>{item.name} {item.surname}</Text>
               <Text>
-                <Text style={styles.attribute}>Department: </Text>
-                <Text style={styles.colleagueText}>{item.department}</Text>
+                <Text style={[styles.colleagueText, isDarkMode ? styles.darkText : styles.lightText] }>Department: </Text>
+                <Text style={[styles.colleagueText, isDarkMode ? styles.darkText : styles.lightText]}>{item.department}</Text>
+                </Text>
+
+              <Text>
+                <Text style={[styles.colleagueText, isDarkMode ? styles.darkText : styles.lightText]}>Desciption: </Text>
+                <Text style={[styles.colleagueText, isDarkMode ? styles.darkText : styles.lightText]}> {item.description}</Text>
               </Text>
 
               <Text>
-                <Text style={styles.attribute}>Desciption: </Text>
-                <Text style={styles.colleagueText}> {item.description}</Text>
-              </Text>
-
-              <Text>
-                <Text style={styles.attribute}>Last Catch-Up Protocol: </Text>
-                <Text style={styles.colleagueText}> {item.protocol}</Text>
+                <Text style={[styles.colleagueText, isDarkMode ? styles.darkText : styles.lightText]}>Last Catch-Up Protocol: </Text>
+                <Text style={[styles.colleagueText, isDarkMode ? styles.darkText : styles.lightText]}> {item.protocol}</Text>
               </Text>
 
             </View>
