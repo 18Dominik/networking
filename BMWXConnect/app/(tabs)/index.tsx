@@ -9,12 +9,12 @@ const App = () => {
 
   // Detect whether dark mode or light mode is active
   const colorScheme = useColorScheme();
-  
-//f for refresh
+
+  //f for refresh
 
   const [refresh, setRefresh] = useState(false); // State to trigger refresh
-  
- 
+
+
   // Conditional styles based on the color scheme
   const isDarkMode = colorScheme === 'dark';
 
@@ -28,7 +28,7 @@ const App = () => {
   const [editingId, setEditingId] = useState(null);
   const [search, setSearch] = useState('');
 
- 
+
   useEffect(() => {
 
     fetchColleagues();
@@ -38,51 +38,51 @@ const App = () => {
 
   }, [refresh]);// Add refresh as a dependency
 
-    // Function to trigger refresh
-    const reloadTab = () => {
-      setRefresh(!refresh); 
-      retrieveScannedData(); // Toggling refresh state
-    };
- // Function to handle file upload on mobile (iOS/Android)
- const handleFileUploadMobile = async () => {
-  try {
-    const result = await DocumentPicker.getDocumentAsync({
-      type: 'application/json',
-    });
-    if (result.type === 'success') {
-      const fileUri = result.uri;
-      const fileContent = await FileSystem.readAsStringAsync(fileUri);
-      const json = JSON.parse(fileContent);
-      setColleagues(json); // Update colleagues state with parsed JSON data
-      await AsyncStorage.setItem('colleagues', JSON.stringify(json)); // Save to AsyncStorage if needed
-      // Call reloadTab to refresh the display after upload
-      reloadTab();  // <-- This will refresh the colleague list after the file upload
-    }
-  } catch (error) {
-    console.error('Error picking file:', error);
-  }
-};
-// Function to handle file upload on web
-const handleFileUploadWeb = async (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const content = e.target.result; // File content as string
-      try {
-        const json = JSON.parse(content);
+  // Function to trigger refresh
+  const reloadTab = () => {
+    setRefresh(!refresh);
+    retrieveScannedData(); // Toggling refresh state
+  };
+  // Function to handle file upload on mobile (iOS/Android)
+  const handleFileUploadMobile = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'application/json',
+      });
+      if (result.type === 'success') {
+        const fileUri = result.uri;
+        const fileContent = await FileSystem.readAsStringAsync(fileUri);
+        const json = JSON.parse(fileContent);
         setColleagues(json); // Update colleagues state with parsed JSON data
         await AsyncStorage.setItem('colleagues', JSON.stringify(json)); // Save to AsyncStorage if needed
-      // Call reloadTab to refresh the display after upload
-    reloadTab();  // <-- This will refresh the colleague list after the file upload
-      
-      } catch (error) {
-        console.error('Failed to parse JSON:', error);
+        // Call reloadTab to refresh the display after upload
+        reloadTab();  // <-- This will refresh the colleague list after the file upload
       }
-    };
-    reader.readAsText(file);
-  }
-};
+    } catch (error) {
+      console.error('Error picking file:', error);
+    }
+  };
+  // Function to handle file upload on web
+  const handleFileUploadWeb = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const content = e.target.result; // File content as string
+        try {
+          const json = JSON.parse(content);
+          setColleagues(json); // Update colleagues state with parsed JSON data
+          await AsyncStorage.setItem('colleagues', JSON.stringify(json)); // Save to AsyncStorage if needed
+          // Call reloadTab to refresh the display after upload
+          reloadTab();  // <-- This will refresh the colleague list after the file upload
+
+        } catch (error) {
+          console.error('Failed to parse JSON:', error);
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
 
   // Upload button handler based on platform
   const handleUploadButtonClick = () => {
@@ -91,7 +91,7 @@ const handleFileUploadWeb = async (event) => {
     } else {
       handleFileUploadMobile(); // Use DocumentPicker for mobile
     }
-    
+
 
   };
 
@@ -129,46 +129,46 @@ const handleFileUploadWeb = async (event) => {
   };
 
   // Function to trigger file download on web
-const downloadFileOnWeb = (fileData, fileName) => {
-  const blob = new Blob([fileData], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', fileName);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
+  const downloadFileOnWeb = (fileData, fileName) => {
+    const blob = new Blob([fileData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
 
-// Function to download colleague data
-const downloadColleagueData = async () => {
-  try {
-    const colleaguesString = await AsyncStorage.getItem('colleagues');
-    const colleagues = colleaguesString ? JSON.parse(colleaguesString) : [];
-    const fileData = JSON.stringify(colleagues, null, 2);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
-    if (Platform.OS === 'web') {
-      // Handle file download on the web
-      downloadFileOnWeb(fileData, 'colleagues.json');
-    } else {
-      // Handle file download on mobile (iOS/Android)
-      const fileUri = FileSystem.documentDirectory + 'colleagues.json';
-      await FileSystem.writeAsStringAsync(fileUri, fileData);
+  // Function to download colleague data
+  const downloadColleagueData = async () => {
+    try {
+      const colleaguesString = await AsyncStorage.getItem('colleagues');
+      const colleagues = colleaguesString ? JSON.parse(colleaguesString) : [];
+      const fileData = JSON.stringify(colleagues, null, 2);
 
-      // Optionally, share the file using expo-sharing
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(fileUri);
+      if (Platform.OS === 'web') {
+        // Handle file download on the web
+        downloadFileOnWeb(fileData, 'colleagues.json');
       } else {
-        alert('File saved but sharing is not available.');
+        // Handle file download on mobile (iOS/Android)
+        const fileUri = FileSystem.documentDirectory + 'colleagues.json';
+        await FileSystem.writeAsStringAsync(fileUri, fileData);
+
+        // Optionally, share the file using expo-sharing
+        if (await Sharing.isAvailableAsync()) {
+          await Sharing.shareAsync(fileUri);
+        } else {
+          alert('File saved but sharing is not available.');
+        }
       }
+    } catch (error) {
+      console.error('Failed to download colleague data:', error);
     }
-  } catch (error) {
-    console.error('Failed to download colleague data:', error);
-  }
-};
-  
-//function to fetch all colleauges
+  };
+
+  //function to fetch all colleauges
   const fetchColleagues = async () => {
     try {
       const colleaguesString = await AsyncStorage.getItem('colleagues');
@@ -240,47 +240,47 @@ const downloadColleagueData = async () => {
   };
 
   return (
-    <View style={[styles.container, isDarkMode ? styles.darkContainer : styles.lightContainer]}>      
+    <View style={[styles.container, isDarkMode ? styles.darkContainer : styles.lightContainer]}>
       {/* Logo in the upper right corner */}
       <Image
         source={require('../../assets/images/bmwpng.png')}
         style={styles.logo}
       />
 
-<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-<Text style={[styles.title, isDarkMode ? styles.darkText : styles.lightText]}>My BMW XConnect</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={[styles.title, isDarkMode ? styles.darkText : styles.lightText]}>My BMW XConnect</Text>
         {/* Download Button */}
-        </View>
+      </View>
 
 
-<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}>
 
-  <TouchableOpacity onPress={downloadColleagueData} style={styles.downloadButton}>
-    <MaterialIcons name="file-download" size={24} color={isDarkMode ? "#fff" : "#000"} />
-  </TouchableOpacity>
+        <TouchableOpacity onPress={downloadColleagueData} style={styles.downloadButton}>
+          <MaterialIcons name="file-download" size={24} color={isDarkMode ? "#fff" : "#000"} />
+        </TouchableOpacity>
 
-          {/* Upload Button */}
-          <TouchableOpacity onPress={handleUploadButtonClick} style={styles.downloadButton}>
-    <MaterialIcons name="file-upload" size={24} color={isDarkMode ? "#fff" : "#000"} />
-  </TouchableOpacity>
+        {/* Upload Button */}
+        <TouchableOpacity onPress={handleUploadButtonClick} style={styles.downloadButton}>
+          <MaterialIcons name="file-upload" size={24} color={isDarkMode ? "#fff" : "#000"} />
+        </TouchableOpacity>
 
-  {Platform.OS === 'web' && (
-        <input
-          id="fileInput"
-          type="file"
-          accept="application/json"
-          style={{ display: 'none' }}
-          onChange={handleFileUploadWeb} // Ensure it's passed as a reference
-        />
-      )}
+        {Platform.OS === 'web' && (
+          <input
+            id="fileInput"
+            type="file"
+            accept="application/json"
+            style={{ display: 'none' }}
+            onChange={handleFileUploadWeb} // Ensure it's passed as a reference
+          />
+        )}
 
 
-</View>
+      </View>
 
 
       <Button color='#1c69d4' title={"Refresh"} onPress={reloadTab} />
 
-      
+
       <View style={styles.inputContainer}>
         <TextInput
           style={[styles.input, isDarkMode ? styles.darkInput : styles.lightInput]}
@@ -319,7 +319,7 @@ const downloadColleagueData = async () => {
         />
         <Button color='#1c69d4' title={editingId ? "Update" : "Add"} onPress={saveColleague} />
       </View>
-      
+
       <TextInput
         style={[styles.searchInput, isDarkMode ? styles.darkInput : styles.lightInput]}
         placeholder="Search by name, surname, department, description or protocol"
@@ -336,9 +336,9 @@ const downloadColleagueData = async () => {
             <View style={styles.colleagueDetails}>
               <Text style={[styles.colleagueText, isDarkMode ? styles.darkText : styles.lightText]}>{item.name} {item.surname}</Text>
               <Text>
-                <Text style={[styles.colleagueText, isDarkMode ? styles.darkText : styles.lightText] }>Department: </Text>
+                <Text style={[styles.colleagueText, isDarkMode ? styles.darkText : styles.lightText]}>Department: </Text>
                 <Text style={[styles.colleagueText, isDarkMode ? styles.darkText : styles.lightText]}>{item.department}</Text>
-                </Text>
+              </Text>
 
               <Text>
                 <Text style={[styles.colleagueText, isDarkMode ? styles.darkText : styles.lightText]}>Desciption: </Text>
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   downloadButton: {
     padding: 10,
   },
-  
+
 });
 
 export default App;
