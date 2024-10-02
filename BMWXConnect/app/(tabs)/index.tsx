@@ -250,6 +250,11 @@ const downloadColleagueData = async () => {
 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
 <Text style={[styles.title, isDarkMode ? styles.darkText : styles.lightText]}>My BMW XConnect</Text>
         {/* Download Button */}
+        </View>
+
+
+<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}>
+
   <TouchableOpacity onPress={downloadColleagueData} style={styles.downloadButton}>
     <MaterialIcons name="file-download" size={24} color={isDarkMode ? "#fff" : "#000"} />
   </TouchableOpacity>
