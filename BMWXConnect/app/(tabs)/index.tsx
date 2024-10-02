@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TextInput, Button, Text, FlatList, TouchableOpacity, Image, useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons'; // Example for using vector icons
+import * as FileSystem from 'expo-file-system';
+import { Platform } from 'react-native';
+
+
+
 
 
 const App = () => {
@@ -76,7 +81,46 @@ const App = () => {
 
   };
 
+  // Function to trigger file download on web
+const downloadFileOnWeb = (fileData, fileName) => {
+  const blob = new Blob([fileData], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', fileName);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
 
+// Function to download colleague data
+const downloadColleagueData = async () => {
+  try {
+    const colleaguesString = await AsyncStorage.getItem('colleagues');
+    const colleagues = colleaguesString ? JSON.parse(colleaguesString) : [];
+    const fileData = JSON.stringify(colleagues, null, 2);
+
+    if (Platform.OS === 'web') {
+      // Handle file download on the web
+      downloadFileOnWeb(fileData, 'colleagues.json');
+    } else {
+      // Handle file download on mobile (iOS/Android)
+      const fileUri = FileSystem.documentDirectory + 'colleagues.json';
+      await FileSystem.writeAsStringAsync(fileUri, fileData);
+
+      // Optionally, share the file using expo-sharing
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileUri);
+      } else {
+        alert('File saved but sharing is not available.');
+      }
+    }
+  } catch (error) {
+    console.error('Failed to download colleague data:', error);
+  }
+};
+  
 
   const fetchColleagues = async () => {
     try {
@@ -156,7 +200,15 @@ const App = () => {
         style={styles.logo}
       />
 
-      <Text style={[styles.title, isDarkMode ? styles.darkText : styles.lightText]}>My BMW XConnect</Text>
+<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+<Text style={[styles.title, isDarkMode ? styles.darkText : styles.lightText]}>My BMW XConnect</Text>
+        {/* Download Button */}
+  <TouchableOpacity onPress={downloadColleagueData} style={styles.downloadButton}>
+    <MaterialIcons name="file-download" size={24} color={isDarkMode ? "#fff" : "#000"} />
+  </TouchableOpacity>
+
+</View>
+
 
       <Button color='#1c69d4' title={"Refresh"} onPress={reloadTab} />
 
@@ -328,6 +380,10 @@ const styles = StyleSheet.create({
   deleteButton: {
     color: 'red',
   },
+  downloadButton: {
+    padding: 10,
+  },
+  
 });
 
 export default App;
