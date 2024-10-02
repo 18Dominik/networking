@@ -5,10 +5,6 @@ import { MaterialIcons } from '@expo/vector-icons'; // Example for using vector 
 import * as FileSystem from 'expo-file-system';
 import { Platform } from 'react-native';
 
-
-
-
-
 const App = () => {
 
   // Detect whether dark mode or light mode is active
@@ -47,6 +43,57 @@ const App = () => {
       setRefresh(!refresh); 
       retrieveScannedData(); // Toggling refresh state
     };
+ // Function to handle file upload on mobile (iOS/Android)
+ const handleFileUploadMobile = async () => {
+  try {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: 'application/json',
+    });
+    if (result.type === 'success') {
+      const fileUri = result.uri;
+      const fileContent = await FileSystem.readAsStringAsync(fileUri);
+      const json = JSON.parse(fileContent);
+      setColleagues(json); // Update colleagues state with parsed JSON data
+      await AsyncStorage.setItem('colleagues', JSON.stringify(json)); // Save to AsyncStorage if needed
+      // Call reloadTab to refresh the display after upload
+      reloadTab();  // <-- This will refresh the colleague list after the file upload
+    }
+  } catch (error) {
+    console.error('Error picking file:', error);
+  }
+};
+// Function to handle file upload on web
+const handleFileUploadWeb = async (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const content = e.target.result; // File content as string
+      try {
+        const json = JSON.parse(content);
+        setColleagues(json); // Update colleagues state with parsed JSON data
+        await AsyncStorage.setItem('colleagues', JSON.stringify(json)); // Save to AsyncStorage if needed
+      // Call reloadTab to refresh the display after upload
+    reloadTab();  // <-- This will refresh the colleague list after the file upload
+      
+      } catch (error) {
+        console.error('Failed to parse JSON:', error);
+      }
+    };
+    reader.readAsText(file);
+  }
+};
+
+  // Upload button handler based on platform
+  const handleUploadButtonClick = () => {
+    if (Platform.OS === 'web') {
+      document.getElementById('fileInput').click(); // Trigger the file input for web
+    } else {
+      handleFileUploadMobile(); // Use DocumentPicker for mobile
+    }
+    
+
+  };
 
 
   // Function to retrieve JSON data from AsyncStorage
@@ -121,7 +168,7 @@ const downloadColleagueData = async () => {
   }
 };
   
-
+//function to fetch all colleauges
   const fetchColleagues = async () => {
     try {
       const colleaguesString = await AsyncStorage.getItem('colleagues');
@@ -206,6 +253,22 @@ const downloadColleagueData = async () => {
   <TouchableOpacity onPress={downloadColleagueData} style={styles.downloadButton}>
     <MaterialIcons name="file-download" size={24} color={isDarkMode ? "#fff" : "#000"} />
   </TouchableOpacity>
+
+          {/* Upload Button */}
+          <TouchableOpacity onPress={handleUploadButtonClick} style={styles.downloadButton}>
+    <MaterialIcons name="file-upload" size={24} color={isDarkMode ? "#fff" : "#000"} />
+  </TouchableOpacity>
+
+  {Platform.OS === 'web' && (
+        <input
+          id="fileInput"
+          type="file"
+          accept="application/json"
+          style={{ display: 'none' }}
+          onChange={handleFileUploadWeb} // Ensure it's passed as a reference
+        />
+      )}
+
 
 </View>
 
