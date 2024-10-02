@@ -4,6 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons'; // Example for using vector icons
 import * as FileSystem from 'expo-file-system';
 import { Platform } from 'react-native';
+import * as DocumentPicker from 'expo-document-picker';
+import * as Sharing from 'expo-sharing';
 
 const App = () => {
 
@@ -156,12 +158,14 @@ const App = () => {
         const fileUri = FileSystem.documentDirectory + 'colleagues.json';
         await FileSystem.writeAsStringAsync(fileUri, fileData);
 
-        // Optionally, share the file using expo-sharing
-        if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(fileUri);
-        } else {
-          alert('File saved but sharing is not available.');
-        }
+         // Share the file using expo-sharing
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileUri);
+      } else {
+        alert('Sharing is not available on this device');
+      }
+
+
       }
     } catch (error) {
       console.error('Failed to download colleague data:', error);
