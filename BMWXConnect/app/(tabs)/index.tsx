@@ -6,6 +6,7 @@ import * as FileSystem from 'expo-file-system';
 import { Platform } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Sharing from 'expo-sharing';
+import { assertEasingIsWorklet } from 'react-native-reanimated/lib/typescript/reanimated2/animation/util';
 
 const App = () => {
 
@@ -51,14 +52,23 @@ const App = () => {
       const result = await DocumentPicker.getDocumentAsync({
         type: 'application/json',
       });
-      if (result.type === 'success') {
-        const fileUri = result.uri;
+  
+      // Check if the document was picked (not canceled) and if assets exist
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const fileUri = result.assets[0].uri;  // Access the uri from assets array
         const fileContent = await FileSystem.readAsStringAsync(fileUri);
         const json = JSON.parse(fileContent);
-        setColleagues(json); // Update colleagues state with parsed JSON data
-        await AsyncStorage.setItem('colleagues', JSON.stringify(json)); // Save to AsyncStorage if needed
-        // Call reloadTab to refresh the display after upload
-        reloadTab();  // <-- This will refresh the colleague list after the file upload
+  
+        // Update colleagues state with parsed JSON data
+        setColleagues(json);
+  
+        // Save to AsyncStorage if needed
+        await AsyncStorage.setItem('colleagues', JSON.stringify(json));
+  
+        // Refresh the display after upload
+        reloadTab();  // This will refresh the colleague list after the file upload
+      } else {
+        console.log('Document picking was canceled');
       }
     } catch (error) {
       console.error('Error picking file:', error);
